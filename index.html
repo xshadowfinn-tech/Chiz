@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIZ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 700px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #000000;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #000000 0%, #434343 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .creator {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .creator strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            border-radius: 12px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .board-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 70px);
+            grid-template-rows: repeat(8, 70px);
+            border: 3px solid #2d3748;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .square {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 45px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .square.light {
+            background: #f0d9b5;
+        }
+
+        .square.dark {
+            background: #b58863;
+        }
+
+        .square:hover {
+            filter: brightness(0.9);
+        }
+
+        .square.selected {
+            background: #666666 !important;
+            box-shadow: inset 0 0 0 3px #333333;
+        }
+
+        .square.valid-move {
+            background: #cccccc !important;
+        }
+
+        .square.valid-move::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .timer-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-options label {
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #1a1a1a 0%, #434343 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #000000 0%, #2d2d2d 100%);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .timer-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+        }
+
+        .timer-btn.active {
+            background: linear-gradient(135deg, #1a1a1a 0%, #434343 100%);
+            color: white;
+        }
+
+        .timer-btn:hover {
+            border-color: #000000;
+        }
+
+        .captured {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            border-radius: 12px;
+        }
+
+        .captured h3 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .captured-pieces {
+            font-size: 30px;
+            min-height: 40px;
+        }
+
+        .timers {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .timer {
+            flex: 1;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .timer.white {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            color: #2d3748;
+        }
+
+        .timer.black {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+        }
+
+        .timer.active {
+            box-shadow: 0 0 0 4px #000000;
+            transform: scale(1.05);
+        }
+
+        .timer-label {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .timer-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timer.low-time .timer-display {
+            color: #e53e3e;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>♔ Chess ♚</h1>
+        <div class="creator">Created by <strong>Jamir Goingco</strong> - BSIT Student</div>
+        <div class="status" id="status">White's Turn</div>
+        <div class="timers">
+            <div class="timer white active" id="whiteTimer">
+                <div class="timer-label">White</div>
+                <div class="timer-display" id="whiteTime">10:00</div>
+            </div>
+            <div class="timer black" id="blackTimer">
+                <div class="timer-label">Black</div>
+                <div class="timer-display" id="blackTime">10:00</div>
+            </div>
+        </div>
+        <div class="board-container">
+            <div class="board" id="board"></div>
+        </div>
+        <div class="controls">
+            <div class="timer-options">
+                <label>Timer:</label>
+                <button class="timer-btn" onclick="setTimer(120)">2 min</button>
+                <button class="timer-btn active" onclick="setTimer(300)">5 min</button>
+                <button class="timer-btn" onclick="setTimer(600)">10 min</button>
+                <button class="timer-btn" onclick="setTimer(900)">15 min</button>
+            </div>
+            <div class="game-controls">
+                <button onclick="resetGame()">New Game</button>
+                <button onclick="undoMove()">Undo Move</button>
+            </div>
+        </div>
+        <div class="captured">
+            <h3>Captured Pieces</h3>
+            <div class="captured-pieces" id="captured"></div>
+        </div>
+    </div>
+
+    <script>
+        const pieces = {
+            'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+            'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+        };
+
+        let board = [
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+        ];
+
+        let currentTurn = 'white';
+        let selectedSquare = null;
+        let moveHistory = [];
+        let capturedPieces = [];
+        let whiteTime = 300; // 5 minutes default
+        let blackTime = 300;
+        let selectedTimeLimit = 300;
+        let timerInterval = null;
+        let gameOver = false;
+
+        function initBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    square.onclick = () => handleSquareClick(row, col);
+                    
+                    const piece = board[row][col];
+                    if (piece) {
+                        square.textContent = pieces[piece];
+                    }
+                    
+                    boardEl.appendChild(square);
+                }
+            }
+            updateStatus();
+        }
+
+        function handleSquareClick(row, col) {
+            if (gameOver) return;
+            
+            const piece = board[row][col];
+            
+            if (selectedSquare) {
+                const [selectedRow, selectedCol] = selectedSquare;
+                const selectedPiece = board[selectedRow][selectedCol];
+                
+                if (isValidMove(selectedRow, selectedCol, row, col, selectedPiece)) {
+                    makeMove(selectedRow, selectedCol, row, col);
+                    selectedSquare = null;
+                    clearHighlights();
+                } else if (piece && isCurrentPlayerPiece(piece)) {
+                    selectedSquare = [row, col];
+                    highlightMoves(row, col);
+                } else {
+                    selectedSquare = null;
+                    clearHighlights();
+                }
+            } else if (piece && isCurrentPlayerPiece(piece)) {
+                selectedSquare = [row, col];
+                highlightMoves(row, col);
+            }
+        }
+
+        function isCurrentPlayerPiece(piece) {
+            return (currentTurn === 'white' && piece === piece.toUpperCase()) ||
+                   (currentTurn === 'black' && piece === piece.toLowerCase());
+        }
+
+        function isValidMove(fromRow, fromCol, toRow, toCol, piece) {
+            if (toRow < 0 || toRow > 7 || toCol < 0 || toCol > 7) return false;
+            
+            const targetPiece = board[toRow][toCol];
+            if (targetPiece && isCurrentPlayerPiece(targetPiece)) return false;
+            
+            const p = piece.toLowerCase();
+            const rowDiff = toRow - fromRow;
+            const colDiff = Math.abs(toCol - fromCol);
+            
+            if (p === 'p') {
+                const direction = piece === piece.toUpperCase() ? -1 : 1;
+                const startRow = piece === piece.toUpperCase() ? 6 : 1;
+                
+                if (colDiff === 0 && !targetPiece) {
+                    if (rowDiff === direction) return true;
+                    if (fromRow === startRow && rowDiff === 2 * direction && !board[fromRow + direction][fromCol]) return true;
+                }
+                if (colDiff === 1 && rowDiff === direction && targetPiece) return true;
+            }
+            
+            if (p === 'r') {
+                if (rowDiff === 0 || colDiff === 0) return isPathClear(fromRow, fromCol, toRow, toCol);
+            }
+            
+            if (p === 'n') {
+                return (Math.abs(rowDiff) === 2 && colDiff === 1) || (Math.abs(rowDiff) === 1 && colDiff === 2);
+            }
+            
+            if (p === 'b') {
+                if (Math.abs(rowDiff) === colDiff) return isPathClear(fromRow, fromCol, toRow, toCol);
+            }
+            
+            if (p === 'q') {
+                if (rowDiff === 0 || colDiff === 0 || Math.abs(rowDiff) === colDiff) {
+                    return isPathClear(fromRow, fromCol, toRow, toCol);
+                }
+            }
+            
+            if (p === 'k') {
+                return Math.abs(rowDiff) <= 1 && colDiff <= 1;
+            }
+            
+            return false;
+        }
+
+        function isPathClear(fromRow, fromCol, toRow, toCol) {
+            const rowDir = Math.sign(toRow - fromRow);
+            const colDir = Math.sign(toCol - fromCol);
+            let r = fromRow + rowDir;
+            let c = fromCol + colDir;
+            
+            while (r !== toRow || c !== toCol) {
+                if (board[r][c]) return false;
+                r += rowDir;
+                c += colDir;
+            }
+            return true;
+        }
+
+        function makeMove(fromRow, fromCol, toRow, toCol) {
+            const piece = board[fromRow][fromCol];
+            const captured = board[toRow][toCol];
+            
+            moveHistory.push({
+                from: [fromRow, fromCol],
+                to: [toRow, toCol],
+                piece: piece,
+                captured: captured
+            });
+            
+            if (captured) {
+                capturedPieces.push(captured);
+                updateCaptured();
+            }
+            
+            board[toRow][toCol] = piece;
+            board[fromRow][fromCol] = '';
+            
+            currentTurn = currentTurn === 'white' ? 'black' : 'white';
+            updateTimerDisplay();
+            startTimer();
+            initBoard();
+        }
+
+        function highlightMoves(row, col) {
+            clearHighlights();
+            document.querySelector(`[data-row="${row}"][data-col="${col}"]`).classList.add('selected');
+            
+            const piece = board[row][col];
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (isValidMove(row, col, r, c, piece)) {
+                        document.querySelector(`[data-row="${r}"][data-col="${c}"]`).classList.add('valid-move');
+                    }
+                }
+            }
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.square').forEach(sq => {
+                sq.classList.remove('selected', 'valid-move');
+            });
+        }
+
+        function updateStatus() {
+            if (gameOver) return;
+            document.getElementById('status').textContent = `${currentTurn === 'white' ? 'White' : 'Black'}'s Turn`;
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (gameOver) return;
+            
+            timerInterval = setInterval(() => {
+                if (currentTurn === 'white') {
+                    whiteTime--;
+                    if (whiteTime <= 0) {
+                        endGame('Black wins on time!');
+                        return;
+                    }
+                } else {
+                    blackTime--;
+                    if (blackTime <= 0) {
+                        endGame('White wins on time!');
+                        return;
+                    }
+                }
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const whiteTimer = document.getElementById('whiteTimer');
+            const blackTimer = document.getElementById('blackTimer');
+            
+            whiteTimer.classList.toggle('active', currentTurn === 'white' && !gameOver);
+            blackTimer.classList.toggle('active', currentTurn === 'black' && !gameOver);
+            
+            whiteTimer.classList.toggle('low-time', whiteTime <= 60);
+            blackTimer.classList.toggle('low-time', blackTime <= 60);
+            
+            document.getElementById('whiteTime').textContent = formatTime(whiteTime);
+            document.getElementById('blackTime').textContent = formatTime(blackTime);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function endGame(message) {
+            gameOver = true;
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('status').textContent = message;
+            updateTimerDisplay();
+        }
+
+        function updateCaptured() {
+            document.getElementById('captured').textContent = capturedPieces.map(p => pieces[p]).join(' ');
+        }
+
+        function resetGame() {
+            board = [
+                ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+                ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+                ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+            ];
+            currentTurn = 'white';
+            selectedSquare = null;
+            moveHistory = [];
+            capturedPieces = [];
+            whiteTime = selectedTimeLimit;
+            blackTime = selectedTimeLimit;
+            gameOver = false;
+            if (timerInterval) clearInterval(timerInterval);
+            initBoard();
+            updateCaptured();
+            updateTimerDisplay();
+            startTimer();
+        }
+
+        function setTimer(seconds) {
+            selectedTimeLimit = seconds;
+            
+            // Update button states
+            document.querySelectorAll('.timer-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Reset game with new timer
+            resetGame();
+        }
+
+        function undoMove() {
+            if (moveHistory.length === 0) return;
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            const lastMove = moveHistory.pop();
+            board[lastMove.from[0]][lastMove.from[1]] = lastMove.piece;
+            board[lastMove.to[0]][lastMove.to[1]] = lastMove.captured;
+            
+            if (lastMove.captured) {
+                capturedPieces.pop();
+                updateCaptured();
+            }
+            
+            currentTurn = currentTurn === 'white' ? 'black' : 'white';
+            selectedSquare = null;
+            gameOver = false;
+            initBoard();
+            updateTimerDisplay();
+            startTimer();
+        }
+
+        initBoard();
+        updateTimerDisplay();
+        startTimer();
+    </script>
+</body>
+</html>
